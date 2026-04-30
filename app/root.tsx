@@ -6,9 +6,11 @@ import {
   Scripts,
   ScrollRestoration,
 } from "react-router";
+import { useEffect, useState } from "react"; 
 
 import type { Route } from "./+types/root";
 import "./app.css";
+import { getCurrentUser, signIn as puterSignIn, signOut as puterSignOut } from "../lib/puter.action";
 
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -41,10 +43,50 @@ export function Layout({ children }: { children: React.ReactNode }) {
   );
 }
 
-export default function App() {
-  return <Outlet />;
+const DEFAULT_AUTH_STATE: AuthState = {
+  isSignedIn: false,
+  userName: null,
+  userId: null,
 }
 
+export default function App() {
+  const [authState, setAuthState] = useState<AuthState>(DEFAULT_AUTH_STATE);
+
+  const refreshAuth = async () => {
+    try {
+      const user = await getCurrentUser();
+      setAuthState({
+        isSignedIn: !!user,
+        userName: user ? user.username : null,
+        userId: user ? user.uuid : null,
+      });
+    } catch {
+      setAuthState(DEFAULT_AUTH_STATE);
+    }
+  }
+
+  useEffect(() => {
+    refreshAuth();
+  }, [])
+  
+  const signIn = async () => {
+    await puterSignIn();
+    return await refreshAuth();
+  }
+
+  const signOut = async () => {
+    await puterSignOut();
+    return await refreshAuth();
+  }
+  return (
+    <main className="min-h-screen bg-background text-foreground relative-z-10">
+      <Outlet
+        context={{...authState, signIn, signOut, refreshAuth}}
+      />
+    </main>
+
+  );
+}
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
   let message = "Oops!";
   let details = "An unexpected error occurred.";

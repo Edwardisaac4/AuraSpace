@@ -1,0 +1,14 @@
+{
+  "css.lint.unknownAtRules": "ignore",
+  "[json]": {
+    "editor.inlineSuggest.enabled": false
+  },
+  "[jsonc]": {
+    "editor.inlineSuggest.enabled": false
+  },
+  "github.copilot.enable": {
+    "*": true,
+    "json": false,
+    "jsonc": false
+  }
+}
