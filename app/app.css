@@ -409,10 +409,10 @@
                 @apply mb-8 inline-flex items-center px-3 py-1 rounded-md bg-zinc-800/50 border border-zinc-700 shadow-sm;
 
                 .dot {
-                    @apply w-4 h-4 rounded bg-blue-900/30 flex items-center justify-center mr-2;
+                    @apply flex items-center flex-row gap-3;
 
                     .pulse {
-                        @apply w-2 h-2 rounded-full bg-blue-500 animate-pulse;
+                        @apply w-2 h-2 rounded-full bg-blue-500 animate-pulse ring-[4px] ring-blue-900/30 shrink-0 ml-1;
                     }
                 }
 
@@ -430,7 +430,7 @@
             }
 
             .actions {
-                @apply flex flex-col sm:flex-row gap-4 justify-center mb-16;
+                @apply flex flex-col sm:flex-row gap-4 justify-center mt-10 mb-16;
 
                 .cta {
                     @apply inline-flex items-center justify-center rounded-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-background px-8 py-3 text-sm uppercase tracking-wide font-bold bg-primary text-white hover:bg-[#ea580c] shadow-md;
