@@ -5,6 +5,11 @@ import { ArrowRight, ArrowUpRight, Clock, Layers } from "lucide-react";
 import Button from "~/components/ui/Button";
 import { useNavigate } from "react-router";
 
+/**
+ * Provide metadata for the route used by the document head.
+ *
+ * @returns An array of meta entries: a title entry with `AuraSpace` and a description entry with `content: "Welcome to AuraSpace!"`.
+ */
 export function meta({}: Route.MetaArgs) {
   return [
     { title: "AuraSpace" },
@@ -12,6 +17,13 @@ export function meta({}: Route.MetaArgs) {
   ];
 }
 
+/**
+ * Renders the application's home page, including the hero, upload, and recent projects sections.
+ *
+ * The embedded upload handler generates a timestamp ID and navigates to `/visualizer/{id}` when an upload completes.
+ *
+ * @returns The React element for the home page.
+ */
 export default function Home() {
   const navigate = useNavigate();
   const handleUploadComplete = (base64Data: string) => {
