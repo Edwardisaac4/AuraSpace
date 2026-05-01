@@ -1,7 +1,9 @@
 import NavBar from "~/components/NavBar";
+import Upload from "~/components/Upload";
 import type { Route } from "./+types/home";
 import { ArrowRight, ArrowUpRight, Clock, Layers } from "lucide-react";
 import Button from "~/components/ui/Button";
+import { useNavigate } from "react-router";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -11,6 +13,15 @@ export function meta({}: Route.MetaArgs) {
 }
 
 export default function Home() {
+  const navigate = useNavigate();
+  const handleUploadComplete = (base64Data: string) => {
+    const newId = Date.now().toString();
+    sessionStorage.setItem(`auraspace-upload-${newId}`, base64Data);
+    navigate(`/visualizer/${newId}`);
+  }
+
+  
+
   return (
     <div className="home">
       <NavBar />
@@ -47,7 +58,7 @@ export default function Home() {
               <h3>Upload Reference Image</h3>
               <p>Supports JPG, PNG and WEBP (Max 10MB)</p>
             </div>
-            <p>Upload Images</p>
+            <Upload onComplete={handleUploadComplete}/>
           </div>
         </div>
       </section>

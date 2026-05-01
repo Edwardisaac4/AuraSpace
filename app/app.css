@@ -197,7 +197,7 @@
         .dropzone {
             @apply relative h-48 rounded-xl border-2 border-dashed transition-all duration-300 flex flex-col items-center justify-center cursor-pointer bg-zinc-800/50 border-zinc-700 hover:border-zinc-600 hover:bg-zinc-800;
 
-            &.is-dragging {
+            &.dragging {
                 @apply border-primary bg-orange-900/20;
 
                 .drop-icon {
@@ -223,9 +223,13 @@
                 .help {
                     @apply text-zinc-500 text-xs;
                 }
+
+                .upload-error {
+                    @apply text-red-400 text-xs font-medium mt-2;
+                }
             }
 
-            &:not(.is-dragging):hover .drop-icon {
+            &:not(.dragging):hover .drop-icon {
                 @apply bg-zinc-600 text-white;
             }
         }
