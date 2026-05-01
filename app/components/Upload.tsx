@@ -1,5 +1,5 @@
 import { CheckCircle2, UploadIcon, ImageIcon } from "lucide-react";
-import { useState } from "react"
+import { useState, useRef, useEffect } from "react"
 import { useOutletContext } from "react-router";
 import { PROGRESS_STEP, PROGRESS_INTERVAL_MS, REDIRECT_DELAY_MS } from "../../lib/constants";
 
@@ -7,14 +7,45 @@ interface UploadProps {
   onComplete?: (data: string) => void;
 }
 
+const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"];
+const MAX_SIZE = 50 * 1024 * 1024; // 50MB
+
 const Upload = ({ onComplete }: UploadProps) => {
   const [file, setFile] = useState<File | null>(null);
   const [isDragging, setIsDragging] = useState<boolean>(false);
   const [progress, setProgress] = useState<number>(0);
+  const [error, setError] = useState<string | null>(null);
+
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const {isSignedIn} = useOutletContext<AuthContext>();
 
+  // Cleanup timers on unmount
+  useEffect(() => {
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    };
+  }, []);
+
   const processFile = (file: File) => {
+    setError(null);
+
+    if (!ALLOWED_TYPES.includes(file.type)) {
+      setError("Invalid file type. Please upload a JPG, PNG, or WEBP image.");
+      return;
+    }
+
+    if (file.size > MAX_SIZE) {
+      setError("File is too large. Maximum size is 50MB.");
+      return;
+    }
+
+    // Clear any existing timers from a previous upload
+    if (intervalRef.current) clearInterval(intervalRef.current);
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+
     setFile(file);
     setProgress(0);
 
@@ -23,13 +54,15 @@ const Upload = ({ onComplete }: UploadProps) => {
       const base64Data = reader.result as string;
       let currentProgress = 0;
       
-      const interval = setInterval(() => {
+      intervalRef.current = setInterval(() => {
         currentProgress += PROGRESS_STEP;
         if (currentProgress >= 100) {
           setProgress(100);
-          clearInterval(interval);
-          setTimeout(() => {
+          if (intervalRef.current) clearInterval(intervalRef.current);
+          intervalRef.current = null;
+          timeoutRef.current = setTimeout(() => {
             if (onComplete) onComplete(base64Data);
+            timeoutRef.current = null;
           }, REDIRECT_DELAY_MS);
         } else {
           setProgress(currentProgress);
@@ -101,7 +134,7 @@ const Upload = ({ onComplete }: UploadProps) => {
           <input 
             type="file" 
             className="drop-input" 
-            accept=".jpg, .png, .jpeg" 
+            accept=".jpg, .png, .jpeg, .webp" 
             disabled={!isSignedIn} 
             onChange={handleChange}
           />
@@ -114,7 +147,8 @@ const Upload = ({ onComplete }: UploadProps) => {
               {isSignedIn ? "Upload image or drag and drop" : "Please sign in to upload"}
             </p>
             
-            <p className="help"> JPG, PNG or JPEG (max 50MB) </p>
+            <p className="help"> JPG, PNG or WEBP (max 50MB) </p>
+            {error && <p className="upload-error">{error}</p>}
           </div>
         </div>
       ) : (

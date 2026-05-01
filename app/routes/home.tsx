@@ -16,9 +16,8 @@ export default function Home() {
   const navigate = useNavigate();
   const handleUploadComplete = (base64Data: string) => {
     const newId = Date.now().toString();
-    // Pass the base64 image to the route via search params
+    sessionStorage.setItem(`auraspace-upload-${newId}`, base64Data);
     navigate(`/visualizer/${newId}`);
-    return true;
   }
 
   
