@@ -1,24 +1,32 @@
-import { useLocation } from "react-router"
-
+import { useState, useEffect } from 'react'
+import { useParams, useNavigate } from 'react-router'
 
 const Visualizer = () => {
-    const location = useLocation();
-    const { initialImage, name } = location.state || {};
+  const { id } = useParams();
+  const [imageData, setImageData] = useState<string | null>(null);
 
+  useEffect(() => {
+    if (!id) return;
+
+    const stored = sessionStorage.getItem(`auraspace-upload-${id}`);
+    if (stored) {
+      setImageData(stored);
+    }
+  }, [id]);
+
+  if (!imageData) {
     return (
-        <section>
-            <h1>{name || "untitled Project"}</h1>
+      <div className="visualizer-route loading">
+        <p>No image found. Please upload an image first.</p>
+      </div>
+    );
+  }
 
-            <div className="visualizer">
-                {initialImage && (
-                    <div className="image-container">
-                        <h2>Source Image</h2>
-                        <img src={initialImage} alt="Source" />
-                    </div>
-                )}
-            </div>
-        </section>
-    )
+  return (
+    <div className="visualizer-route">
+      <img src={imageData} alt="Uploaded reference" />
+    </div>
+  )
 }
 
 export default Visualizer

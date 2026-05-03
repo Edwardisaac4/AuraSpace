@@ -4,8 +4,6 @@ import type { Route } from "./+types/home";
 import { ArrowRight, ArrowUpRight, Clock, Layers } from "lucide-react";
 import Button from "~/components/ui/Button";
 import { useNavigate } from "react-router";
-import { useState } from "react";
-import { createProject } from "../../lib/puter.action";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -16,33 +14,11 @@ export function meta({}: Route.MetaArgs) {
 
 export default function Home() {
   const navigate = useNavigate();
-  const handleUploadComplete = async (base64Data: string) => {
+  const handleUploadComplete = (base64Data: string) => {
     const newId = Date.now().toString();
-    const name = `Residence ${newId}`;
-    const newItem = {
-      id: newId,
-      name,
-      sourceImage: base64Data,
-      timestamp: Date.now(),
-    }
-
-    const saved = await createProject({ item: newItem, visibility: 'private' });
-    if (!saved) {
-      console.error("failed to save new project");
-      return false;
-    }
-
-    setProjects((prev) => [newItem, ...prev])
-    navigate(`/visualizer/${newId}`, {
-      state: {
-        initialImage: saved.sourceImage,
-        intialRendered: saved.renderedImage || null,
-        name
-      },
-    });
+    sessionStorage.setItem(`auraspace-upload-${newId}`, base64Data);
+    navigate(`/visualizer/${newId}`);
   }
-
-  const [projects, setProjects] = useState<DesignItem[]>([]);
 
   
 
@@ -98,10 +74,9 @@ export default function Home() {
           </div>
 
           <div className="projects-grid">
-            {projects.map(({ id, name, renderedImage, sourceImage, timestamp }) => (
-              <div key={id} className="project-card group">
+            <div className="project-card group">
               <div className="preview">
-                <img src={renderedImage || sourceImage} alt={name || "project"} />
+                <img src="https://roomify-mlhuk267-dfwu1i.puter.site/projects/1770803585402/rendered.png" alt="project" />
                 <div className="badge">
                   <span className="status"></span>
                   <span className="label">Community Pick</span>
@@ -109,18 +84,18 @@ export default function Home() {
               </div>
               <div className="card-body">
                 <div>
-                  <h3>{name || `Project ${id}`}</h3>
+                  <h3>Project Manhattan</h3>
 
                   <div className="meta">
                     <Clock size={12} />
-                    <span>{new Date(timestamp).toLocaleTimeString()}</span>
+                    <span>{new Date().toLocaleTimeString()}</span>
+                    <span>Eddie</span>
                   </div>
 
                   <div className="arrow"><ArrowUpRight size={20} className="icon" /></div>
                 </div>
               </div>
             </div>
-            ))}
           </div>
         </div>
       </section>
