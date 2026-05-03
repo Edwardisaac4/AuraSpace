@@ -57,7 +57,7 @@ export const createProject = async({item} : CreateProjectParams):Promise<DesignI
         const existingProjects = await getProjects();
         await puter.kv.set(PROJECTS_KEY, [payload, ...existingProjects]);
         return payload as DesignItem;
-    } catch (error) {
+    } catch (error)  {
         console.log('Error Saving File');
         return null;
     }
