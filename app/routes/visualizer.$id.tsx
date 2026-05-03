@@ -3,7 +3,6 @@ import { useParams, useNavigate } from 'react-router'
 
 const Visualizer = () => {
   const { id } = useParams();
-  const navigate = useNavigate();
   const [imageData, setImageData] = useState<string | null>(null);
 
   useEffect(() => {
