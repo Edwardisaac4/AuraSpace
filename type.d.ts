@@ -1,5 +1,5 @@
 interface AuthState {
-    isSignedIn: boolean;
+    isSignedIn: Boolean;
     userName: string | null;
     userId: string | null;
 }
@@ -89,9 +89,9 @@ type AuthContext = {
     isSignedIn: boolean;
     userName: string | null;
     userId: string | null;
-    refreshAuth: () => Promise<boolean>;
-    signIn: () => Promise<boolean>;
-    signOut: () => Promise<boolean>;
+    refreshAuth: () => Promise<void>;
+    signIn: () => Promise<void>;
+    signOut: () => Promise<void>;
 };
 
 type AuthRequiredModalProps = {
