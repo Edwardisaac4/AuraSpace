@@ -54,12 +54,22 @@ export const createProject = async({item} : CreateProjectParams):Promise<DesignI
     }
 
     try {
-        return payload;
+        const existingProjects = await getProjects();
+        await puter.kv.set(PROJECTS_KEY, [payload, ...existingProjects]);
+        return payload as DesignItem;
     } catch (error) {
         console.log('Error Saving File');
         return null;
     }
+}
 
-    // TODO: save project to puter storage and return the DesignItem
-    
-}   
+const PROJECTS_KEY = "auraspace_projects";
+
+export const getProjects = async (): Promise<DesignItem[]> => {
+    try {
+        const stored = await puter.kv.get(PROJECTS_KEY);
+        return (stored as unknown as DesignItem[]) || [];
+    } catch {
+        return [];
+    }
+};

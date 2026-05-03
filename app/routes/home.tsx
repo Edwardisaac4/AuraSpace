@@ -4,10 +4,10 @@ import type { Route } from "./+types/home";
 import { ArrowRight, ArrowUpRight, Clock, Layers } from "lucide-react";
 import Button from "~/components/ui/Button";
 import { useNavigate } from "react-router";
-import { useState } from "react";
-import { createProject } from "../../lib/puter.action";
+import { useState, useEffect } from "react";
+import { createProject, getProjects } from "../../lib/puter.action";
 
-export function meta({}: Route.MetaArgs) {
+export function meta({ }: Route.MetaArgs) {
   return [
     { title: "AuraSpace" },
     { name: "description", content: "Welcome to AuraSpace!" },
@@ -36,7 +36,7 @@ export default function Home() {
     navigate(`/visualizer/${newId}`, {
       state: {
         initialImage: saved.sourceImage,
-        intialRendered: saved.renderedImage || null,
+        initialRender: saved.renderedImage || null,
         name
       },
     });
@@ -44,7 +44,12 @@ export default function Home() {
 
   const [projects, setProjects] = useState<DesignItem[]>([]);
 
-  
+  useEffect(() => {
+    getProjects()
+      .then((loaded) => setProjects(loaded))
+      .catch(() => setProjects([]));
+  }, []);
+
 
   return (
     <div className="home">
@@ -65,7 +70,7 @@ export default function Home() {
 
         <div className="actions">
           <a href="#upload" className="cta">Start Exploring <ArrowRight className="icon" /></a>
-          <Button variant= "outline" size = "lg" className="demo-btn">
+          <Button variant="outline" size="lg" className="demo-btn">
             View Demo
           </Button>
         </div>
@@ -76,13 +81,13 @@ export default function Home() {
           <div className="upload-card">
             <div className="upload-head">
               <div className="upload-icon">
-                <Layers/>
+                <Layers />
               </div>
 
               <h3>Upload Reference Image</h3>
               <p>Supports JPG, PNG and WEBP (Max 10MB)</p>
             </div>
-            <Upload onComplete={handleUploadComplete}/>
+            <Upload onComplete={handleUploadComplete} />
           </div>
         </div>
       </section>
@@ -94,32 +99,32 @@ export default function Home() {
               <h2>Recent AI Creations</h2>
               <p>Feast your eyes on what our community has created with AuraSpace</p>
             </div>
-            
+
           </div>
 
           <div className="projects-grid">
             {projects.map(({ id, name, renderedImage, sourceImage, timestamp }) => (
               <div key={id} className="project-card group">
-              <div className="preview">
-                <img src={renderedImage || sourceImage} alt={name || "project"} />
-                <div className="badge">
-                  <span className="status"></span>
-                  <span className="label">Community Pick</span>
-                </div>
-              </div>
-              <div className="card-body">
-                <div>
-                  <h3>{name || `Project ${id}`}</h3>
-
-                  <div className="meta">
-                    <Clock size={12} />
-                    <span>{new Date(timestamp).toLocaleTimeString()}</span>
+                <div className="preview">
+                  <img src={renderedImage || sourceImage} alt={name || "project"} />
+                  <div className="badge">
+                    <span className="status"></span>
+                    <span className="label">Community Pick</span>
                   </div>
+                </div>
+                <div className="card-body">
+                  <div>
+                    <h3>{name || `Project ${id}`}</h3>
 
-                  <div className="arrow"><ArrowUpRight size={20} className="icon" /></div>
+                    <div className="meta">
+                      <Clock size={12} />
+                      <span>{new Date(timestamp).toLocaleTimeString()}</span>
+                    </div>
+
+                    <div className="arrow"><ArrowUpRight size={20} className="icon" /></div>
+                  </div>
                 </div>
               </div>
-            </div>
             ))}
           </div>
         </div>

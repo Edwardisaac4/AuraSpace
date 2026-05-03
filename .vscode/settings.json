@@ -1,7 +1,3 @@
 {
-  "css.lint.unknownAtRules": "ignore",
-  "editor.inlineSuggest.enabled": false,
-  "github.copilot.enable": {
-    "*": false
-  }
+  "css.lint.unknownAtRules": "ignore"
 }
