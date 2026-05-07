@@ -1,4 +1,7 @@
 {
+<<<<<<< HEAD
+  "css.lint.unknownAtRules": "ignore"
+=======
   "css.lint.unknownAtRules": "ignore",
   "[json]": {
     "editor.inlineSuggest.enabled": false
@@ -11,4 +14,5 @@
     "json": false,
     "jsonc": false
   }
+>>>>>>> d633b64beaae2db5e78b5c200286728a2419312f
 }

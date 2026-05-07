@@ -335,6 +335,78 @@
                 }
             }
 
+            .mode-bar {
+                @apply flex items-center gap-2 px-5 py-3 border-b border-zinc-800 bg-zinc-900/80;
+
+                .mode-btn {
+                    @apply relative inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wide transition-all duration-200 border border-transparent;
+                    @apply text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 cursor-pointer;
+
+                    &:disabled {
+                        @apply opacity-50 cursor-not-allowed;
+                    }
+
+                    .mode-icon {
+                        @apply w-4 h-4;
+                    }
+
+                    .mode-label {
+                        @apply hidden sm:inline;
+                    }
+
+                    /* Small dot indicating a cached result exists for this mode */
+                    .mode-cached {
+                        @apply w-1.5 h-1.5 rounded-full bg-green-500 absolute top-1.5 right-1.5;
+                    }
+
+                    &.active {
+                        @apply bg-primary/15 text-primary border-primary/30;
+
+                        .mode-icon {
+                            @apply text-primary;
+                        }
+
+                        .mode-cached {
+                            @apply bg-primary;
+                        }
+                    }
+                }
+            }
+
+            .sub-nav {
+                @apply flex flex-col gap-3 px-5 py-3 border-b border-zinc-800 bg-zinc-900;
+
+                .slider-group {
+                    @apply flex items-center gap-3 overflow-hidden;
+
+                    .slider-label {
+                        @apply text-[10px] font-bold uppercase tracking-widest text-zinc-500 shrink-0 w-12;
+                    }
+
+                    .slider-track {
+                        @apply flex items-center gap-2 overflow-x-auto pb-1;
+                        /* Hide scrollbar for a cleaner look */
+                        -ms-overflow-style: none;
+                        scrollbar-width: none;
+                        &::-webkit-scrollbar {
+                            display: none;
+                        }
+
+                        .slider-pill {
+                            @apply shrink-0 px-3 py-1.5 rounded-full text-xs font-medium text-zinc-400 bg-zinc-800 border border-zinc-700 transition-all duration-300 hover:text-white hover:border-zinc-500 cursor-pointer;
+
+                            &.active {
+                                @apply bg-white text-black border-white shadow-sm;
+                            }
+
+                            &:disabled {
+                                @apply opacity-50 cursor-not-allowed hover:border-zinc-700 hover:text-zinc-400;
+                            }
+                        }
+                    }
+                }
+            }
+
             .render-area {
                 @apply relative bg-zinc-800 min-h-105;
 
@@ -398,6 +470,76 @@
 
                 .compare-img {
                     @apply w-full h-auto object-contain;
+                }
+            }
+        }
+
+        .recommendations-section {
+            @apply mt-8 bg-zinc-900 rounded-xl border border-zinc-700 shadow-2xl p-6;
+
+            .section-header {
+                @apply mb-6;
+
+                .title-group {
+                    @apply flex items-center gap-2 mb-1;
+
+                    h3 {
+                        @apply text-xl font-serif font-bold text-white;
+                    }
+                }
+
+                .subtitle {
+                    @apply text-xs text-zinc-400;
+                }
+            }
+
+            .products-grid {
+                @apply grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4;
+
+                .product-card {
+                    @apply bg-zinc-800/50 rounded-lg border border-zinc-700 overflow-hidden cursor-pointer transition-all duration-300 hover:bg-zinc-800 hover:border-zinc-600 hover:-translate-y-1 hover:shadow-lg;
+
+                    &:hover {
+                        .product-image img {
+                            @apply scale-105 opacity-100;
+                        }
+
+                        .view-btn {
+                            @apply opacity-100 translate-x-0;
+                        }
+                    }
+
+                    .product-image {
+                        @apply aspect-square relative overflow-hidden bg-zinc-900;
+
+                        img {
+                            @apply w-full h-full object-cover transition-transform duration-700 opacity-80;
+                        }
+
+                        .product-category {
+                            @apply absolute top-2 left-2 bg-black/60 backdrop-blur-md text-[9px] uppercase tracking-wider font-bold text-white px-2 py-1 rounded;
+                        }
+                    }
+
+                    .product-info {
+                        @apply p-3;
+
+                        .product-title {
+                            @apply text-sm font-medium text-zinc-200 mb-2 truncate;
+                        }
+
+                        .product-meta {
+                            @apply flex items-center justify-between;
+
+                            .product-price {
+                                @apply text-xs font-mono text-zinc-400;
+                            }
+
+                            .view-btn {
+                                @apply text-[10px] uppercase font-bold text-primary flex items-center opacity-0 -translate-x-2 transition-all duration-300;
+                            }
+                        }
+                    }
                 }
             }
         }
