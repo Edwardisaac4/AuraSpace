@@ -1,27 +1,61 @@
+/**
+ * Upload.tsx — File upload component with drag-and-drop support.
+ *
+ * This component handles the entire file upload flow:
+ *  1. Presents a dropzone UI where the user can click or drag-and-drop an image.
+ *  2. Validates the file type (JPEG, PNG, WebP) and size (max 50MB).
+ *  3. Reads the file as a Base64 data-URL using `FileReader`.
+ *  4. Simulates an upload progress bar using `setInterval`.
+ *  5. Calls `onComplete(base64Data)` when progress reaches 100%.
+ *
+ * The upload is gated behind authentication — the dropzone is disabled
+ * when the user is not signed in.
+ */
+
 import { CheckCircle2, UploadIcon, ImageIcon } from "lucide-react";
 import { useState, useRef, useEffect } from "react"
 import { useOutletContext } from "react-router";
 import { PROGRESS_STEP, PROGRESS_INTERVAL_MS, REDIRECT_DELAY_MS } from "../../lib/constants";
 
+/**
+ * Props for the Upload component.
+ * @property onComplete - Callback fired with the Base64 data-URL once the
+ *                        simulated upload completes.
+ */
 interface UploadProps {
   onComplete?: (data: string) => void;
 }
 
+/** Accepted MIME types for uploaded images. */
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"];
+
+/** Maximum allowed file size in bytes (50 MB). */
 const MAX_SIZE = 50 * 1024 * 1024; // 50MB
 
+/**
+ * Upload component — drag-and-drop image uploader with progress bar.
+ *
+ * @param onComplete - Called with the file's Base64 data-URL after
+ *                     the simulated upload animation finishes.
+ */
 const Upload = ({ onComplete }: UploadProps) => {
-  const [file, setFile] = useState<File | null>(null);
-  const [isDragging, setIsDragging] = useState<boolean>(false);
-  const [progress, setProgress] = useState<number>(0);
-  const [error, setError] = useState<string | null>(null);
+  // ── Local State ──
+  const [file, setFile] = useState<File | null>(null);           // The selected file object
+  const [isDragging, setIsDragging] = useState<boolean>(false);  // Whether a file is being dragged over the dropzone
+  const [progress, setProgress] = useState<number>(0);           // Simulated upload progress (0–100)
+  const [error, setError] = useState<string | null>(null);       // Validation error message
 
+  // Refs to hold timer IDs so they can be cleaned up on unmount
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // Pull auth state from the root outlet context (upload is disabled when signed out)
   const {isSignedIn} = useOutletContext<AuthContext>();
 
-  // Cleanup timers on unmount
+  /**
+   * Cleanup effect — clears any running timers when the component unmounts
+   * to prevent memory leaks and state updates on unmounted components.
+   */
   useEffect(() => {
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
@@ -29,14 +63,31 @@ const Upload = ({ onComplete }: UploadProps) => {
     };
   }, []);
 
+  /**
+   * Validates the selected file and kicks off the simulated upload process.
+   *
+   * Steps:
+   *  1. Check file type against the allowed MIME types.
+   *  2. Check file size against the 50MB limit.
+   *  3. Clear any existing timers from a previous upload attempt.
+   *  4. Read the file as a Base64 data-URL via `FileReader`.
+   *  5. Start a `setInterval` that increments the progress bar by `PROGRESS_STEP`
+   *     every `PROGRESS_INTERVAL_MS` milliseconds.
+   *  6. When progress hits 100%, clear the interval and call `onComplete`
+   *     after a short `REDIRECT_DELAY_MS` pause.
+   *
+   * @param file - The `File` object selected by the user.
+   */
   const processFile = (file: File) => {
     setError(null);
 
+    // Validate file type
     if (!ALLOWED_TYPES.includes(file.type)) {
       setError("Invalid file type. Please upload a JPG, PNG, or WEBP image.");
       return;
     }
 
+    // Validate file size
     if (file.size > MAX_SIZE) {
       setError("File is too large. Maximum size is 50MB.");
       return;
@@ -49,17 +100,22 @@ const Upload = ({ onComplete }: UploadProps) => {
     setFile(file);
     setProgress(0);
 
+    // Read the file contents as a Base64 data-URL
     const reader = new FileReader();
     reader.onloadend = () => {
       const base64Data = reader.result as string;
       let currentProgress = 0;
       
+      // Simulate upload progress with a periodic timer
       intervalRef.current = setInterval(() => {
         currentProgress += PROGRESS_STEP;
         if (currentProgress >= 100) {
+          // Upload "complete" — stop the progress bar
           setProgress(100);
           if (intervalRef.current) clearInterval(intervalRef.current);
           intervalRef.current = null;
+
+          // Wait briefly, then fire the completion callback
           timeoutRef.current = setTimeout(() => {
             if (onComplete) onComplete(base64Data);
             timeoutRef.current = null;
@@ -72,6 +128,12 @@ const Upload = ({ onComplete }: UploadProps) => {
     reader.readAsDataURL(file);
   };
 
+  // ── Drag-and-Drop Event Handlers ──
+
+  /**
+   * Fired when a dragged file enters the dropzone area.
+   * Sets the `isDragging` visual state (ignored if not signed in).
+   */
   const handleDragEnter = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -79,6 +141,10 @@ const Upload = ({ onComplete }: UploadProps) => {
     setIsDragging(true);
   };
 
+  /**
+   * Fired when a dragged file leaves the dropzone area.
+   * Checks `relatedTarget` to avoid flickering when moving over child elements.
+   */
   const handleDragLeave = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -93,6 +159,10 @@ const Upload = ({ onComplete }: UploadProps) => {
     setIsDragging(false);
   };
 
+  /**
+   * Fired continuously while a file is dragged over the dropzone.
+   * Keeps `isDragging` true and prevents the browser's default behaviour.
+   */
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -100,6 +170,10 @@ const Upload = ({ onComplete }: UploadProps) => {
     setIsDragging(true); // Ensure it stays true while moving inside
   };
 
+  /**
+   * Fired when the user drops a file onto the dropzone.
+   * Extracts the first dropped file and passes it to `processFile()`.
+   */
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -111,6 +185,10 @@ const Upload = ({ onComplete }: UploadProps) => {
     }
   };
 
+  /**
+   * Fired when the user selects a file via the native file input dialog.
+   * Extracts the selected file and passes it to `processFile()`.
+   */
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!isSignedIn) return;
     
@@ -121,8 +199,10 @@ const Upload = ({ onComplete }: UploadProps) => {
   };
 
 
+  // ── Render ──
   return (
     <div className="upload">
+      {/* Before a file is selected: show the dropzone */}
       {!file ? (
         <div 
           className= {`dropzone ${isDragging ? "dragging" : ""}`}
@@ -131,6 +211,7 @@ const Upload = ({ onComplete }: UploadProps) => {
           onDragOver={handleDragOver}
           onDrop={handleDrop}
         >
+          {/* Hidden native file input — triggered by clicking the dropzone */}
           <input 
             type="file" 
             className="drop-input" 
@@ -148,12 +229,15 @@ const Upload = ({ onComplete }: UploadProps) => {
             </p>
             
             <p className="help"> JPG, PNG or WEBP (max 50MB) </p>
+            {/* Inline validation error message */}
             {error && <p className="upload-error">{error}</p>}
           </div>
         </div>
       ) : (
+        /* After a file is selected: show the upload progress */
         <div className="upload-status">
           <div className="status-content">
+            {/* Icon changes from a file icon to a checkmark when complete */}
             <div className="status-icon">
               {progress === 100 ? (
                 <CheckCircle2 className="check" />
@@ -164,6 +248,7 @@ const Upload = ({ onComplete }: UploadProps) => {
             
             <h3>{file.name}</h3>
 
+              {/* Animated progress bar */}
               <div className="progress">
                 <div className="bar" style={{ width: `${progress}%` }} />
                 
