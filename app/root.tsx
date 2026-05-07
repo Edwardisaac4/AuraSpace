@@ -129,7 +129,7 @@ export default function App() {
   }
 
   return (
-    <main className="min-h-screen bg-background text-foreground relative-z-10">
+    <main className="min-h-screen bg-background text-foreground relative z-10">
       {/* Pass auth state + actions to all child routes via outlet context */}
       <Outlet
         context={{...authState, signIn, signOut, refreshAuth}}
