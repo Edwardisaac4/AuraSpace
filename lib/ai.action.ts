@@ -72,15 +72,16 @@ export const generate3DView = async ({ sourceImage, renderMode = "top-down", sty
     // Step 2: Extract the Base64 payload and MIME type from the data-URL
     // Format: "data:<mimeType>;base64,<base64Data>"
     const baseUrl = dataUrl.split(',')[1];       // The raw Base64 string
-    const mimeType = dataUrl.split(',')[0].split(':')[1]; // e.g. "image/png;base64"
+    const mimeType = dataUrl.split(',')[0].split(':')[1]?.split(';')[0]; // e.g. "image/png"
 
     if (!mimeType || !baseUrl)
         throw new Error("Invalid image data");
 
     // Step 3: Look up the prompt generator for the selected render mode
     const modeConfig = RENDER_MODES.find((m) => m.id === renderMode);
-    const generatePrompt = modeConfig?.generatePrompt ?? RENDER_MODES[0].generatePrompt;
-    const prompt = generatePrompt(style as any, roomType as any);
+    if (!modeConfig) throw new Error(`Invalid render mode: ${renderMode}`);
+    
+    const prompt = modeConfig.generatePrompt(style as any, roomType as any);
     
     // Step 4: Call the Gemini model with the mode-specific prompt
     const response = await puter.ai.txt2img(prompt,{
@@ -91,12 +92,15 @@ export const generate3DView = async ({ sourceImage, renderMode = "top-down", sty
         ratio: {w:1024, h:1024}
     })
 
-    // Step 4: Extract the rendered image URL from the response
+    // Step 5: Extract the rendered image URL from the response
     // The Puter SDK returns an HTMLImageElement whose `src` contains the image data
-    const rawImageUrl = (response as HTMLImageElement).src ?? null;
+    if (!(response instanceof HTMLImageElement)) {
+        throw new Error("Invalid response from Gemini: expected an HTMLImageElement");
+    }
+    const rawImageUrl = response.src;
     if (!rawImageUrl) throw new Error("no raw image url");
 
-    // Step 5: Normalise to a data-URL if the response was a remote URL
+    // Step 6: Normalise to a data-URL if the response was a remote URL
     const renderedImage = rawImageUrl.startsWith('data:') ? rawImageUrl : await fetchAsDataUrl(rawImageUrl);
 
     return renderedImage;

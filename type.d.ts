@@ -17,7 +17,7 @@
  */
 interface AuthState {
     /** Whether the user is currently signed in via Puter auth. */
-    isSignedIn: Boolean;
+    isSignedIn: boolean;
     /** The authenticated user's display name, or null if not signed in. */
     userName: string | null;
     /** The authenticated user's unique ID (UUID), or null if not signed in. */
@@ -342,3 +342,4 @@ type DesignStyle = "Modern" | "Minimalist" | "Industrial" | "Classic" | "Rustic"
 
 /** Specific room types to focus on during interior renders. */
 type RoomType = "Living Room" | "Bedroom" | "Kitchen" | "Bathroom" | "Dining Room";
+

@@ -136,3 +136,4 @@ export const getProjects = async (): Promise<DesignItem[]> => {
         return [];
     }
 };
+

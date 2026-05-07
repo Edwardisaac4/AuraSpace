@@ -116,7 +116,7 @@ export default function App() {
    */
   const signIn = async () => {
     await puterSignIn();
-    return await refreshAuth();
+    await refreshAuth();
   }
 
   /**
@@ -125,11 +125,11 @@ export default function App() {
    */
   const signOut = async () => {
     await puterSignOut();
-    return await refreshAuth();
+    await refreshAuth();
   }
 
   return (
-    <main className="min-h-screen bg-background text-foreground relative-z-10">
+    <main className="min-h-screen bg-background text-foreground relative z-10">
       {/* Pass auth state + actions to all child routes via outlet context */}
       <Outlet
         context={{...authState, signIn, signOut, refreshAuth}}

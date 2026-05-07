@@ -19,6 +19,7 @@
 
 import { useLocation, useNavigate, useParams } from "react-router"
 import { useState, useEffect, useRef, useMemo } from "react"
+import type { ReactNode } from "react"
 import { generate3DView } from "../../lib/ai.action";
 import { RENDER_MODES, DESIGN_STYLES, ROOM_TYPES, MOCK_RECOMMENDATIONS } from "../../lib/constants";
 import { Box, Download, RefreshCcw, Share2, X, Eye, Home, Sofa, ShoppingBag, ArrowRight } from "lucide-react";
@@ -26,7 +27,7 @@ import Button from "~/components/ui/Button";
 
 
 /** Map of icons for each render mode (used in the mode selector bar). */
-const MODE_ICONS: Record<RenderMode, React.ReactNode> = {
+const MODE_ICONS: Record<RenderMode, ReactNode> = {
     "top-down": <Eye className="mode-icon" />,
     "exterior": <Home className="mode-icon" />,
     "interior": <Sofa className="mode-icon" />,
@@ -60,6 +61,9 @@ const Visualizer = () => {
         "top-down": stateData.initialRender || null,
     });
 
+    // Version tick to force re-render when cache updates
+    const [cacheVersion, setCacheVersion] = useState(0);
+
     const [isProcessing, setIsProcessing] = useState(false);
     const [renderMode, setRenderMode] = useState<RenderMode>("top-down");
     const [selectedStyle, setSelectedStyle] = useState<DesignStyle>("Modern");
@@ -87,6 +91,7 @@ const Visualizer = () => {
             if (renderedImage) {
                 const cacheKey = getCacheKey(mode, style, room);
                 renderCache.current[cacheKey] = renderedImage;
+                setCacheVersion(v => v + 1);
 
                 // Only update viewport if the user hasn't switched away while loading
                 if (mode === renderMode && style === selectedStyle && room === selectedRoom) {
@@ -144,7 +149,8 @@ const Visualizer = () => {
             return;
         } else {
             hasInitialGenerated.current = true;
-            runGeneration("top-down", selectedStyle, selectedRoom);
+            // Pass explicit literal defaults instead of reading from state
+            runGeneration("top-down", "Modern", "Living Room");
         }
     }, [initialImage]);
 
@@ -179,7 +185,7 @@ const Visualizer = () => {
                     <span className="name">AuraSpace</span>
                 </div>
                 <Button onClick={handleBack} className="exit" size="sm" variant="ghost">
-                    <X className="icon">Exit Editor</X>
+                    <X className="icon" /> Exit Editor
                 </Button>
             </nav>
 
@@ -217,9 +223,9 @@ const Visualizer = () => {
                                 disabled={isProcessing}
                                 title={mode.description}
                             >
-                                {MODE_ICONS[mode.id]}
+                                {MODE_ICONS[mode.id as RenderMode]}
                                 <span className="mode-label">{mode.label}</span>
-                                {renderCache.current[getCacheKey(mode.id, selectedStyle, selectedRoom)] && (
+                                {cacheVersion >= 0 && renderCache.current[getCacheKey(mode.id, selectedStyle, selectedRoom)] && (
                                     <span className="mode-cached" />
                                 )}
                             </button>
