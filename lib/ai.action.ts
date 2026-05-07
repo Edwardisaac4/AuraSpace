@@ -81,7 +81,7 @@ export const generate3DView = async ({ sourceImage, renderMode = "top-down", sty
     const modeConfig = RENDER_MODES.find((m) => m.id === renderMode);
     if (!modeConfig) throw new Error(`Invalid render mode: ${renderMode}`);
     
-    const prompt = modeConfig.generatePrompt(style as any, roomType as any);
+    const prompt = (modeConfig.generatePrompt as (style?: DesignStyle, roomType?: RoomType) => string)(style, roomType);
     
     // Step 4: Call the Gemini model with the mode-specific prompt
     const response = await puter.ai.txt2img(prompt,{
